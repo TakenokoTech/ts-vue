@@ -13,7 +13,7 @@ action "install" {
 
 action "test" {
   uses  = "actions/npm@master"
-  args  = "flow-test"
+  args  = "run flow-test"
 
   needs = [
     "install"
@@ -31,7 +31,7 @@ action "is-branch-master" {
 
 action "build" {
   uses  = "actions/npm@master"
-  args  = "flow-build"
+  args  = "run flow-build"
 
   needs = [
     "test"
