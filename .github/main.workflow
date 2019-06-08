@@ -7,13 +7,13 @@ workflow "Push" {
 }
 
 action "install" {
-  uses = "actions/npm@59b64a598378f31e49cb76f27d6f3312b582f680"
+  uses = "actions/npm@master"
   args = "install"
 }
 
 action "test" {
-  uses  = "actions/npm@59b64a598378f31e49cb76f27d6f3312b582f680"
-  args  = "test"
+  uses  = "actions/npm@master"
+  args  = "flow-test"
 
   needs = [
     "install"
@@ -30,8 +30,8 @@ action "is-branch-master" {
 }
 
 action "build" {
-  uses  = "actions/npm@59b64a598378f31e49cb76f27d6f3312b582f680"
-  args  = "build"
+  uses  = "actions/npm@master"
+  args  = "flow-build"
 
   needs = [
     "test"

@@ -7,9 +7,10 @@
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "deploy": "gh-pages -d dist",
-    "test": "npm run test:unit",
     "test:e2e": "vue-cli-service test:e2e",
-    "test:unit": "vue-cli-service test:unit"
+    "test:unit": "vue-cli-service test:unit",
+    "flow-build": "npm run build",
+    "flow-test": "npm run test:unit"
   },
   "dependencies": {
     "core-js": "^2.6.5",
