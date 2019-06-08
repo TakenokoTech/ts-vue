@@ -1,11 +1,6 @@
-workflow "Deploy" {
-  on       = "push"
-
-  resolves = [
-    "deploy"
-  ]
-}
-
+# =============================================================================
+# プルリクエスト
+# =============================================================================
 workflow "Pull Request" {
   on       = "pull_request"
 
@@ -28,9 +23,38 @@ action "test" {
   ]
 }
 
+# =============================================================================
+# デプロイ
+# =============================================================================
+workflow "Deploy" {
+  on       = "push"
+
+  resolves = [
+    "deploy"
+  ]
+}
+
 action "is-branch-master" {
   uses = "actions/bin/filter@master"
   args = "branch master"
+}
+
+action "pre-install" {
+  uses  = "actions/npm@master"
+  args  = "install"
+
+  needs = [
+    "is-branch-master"
+  ]
+}
+
+action "pre-test" {
+  uses  = "actions/npm@master"
+  args  = "run test:unit"
+
+  needs = [
+    "pre-install"
+  ]
 }
 
 action "build" {
@@ -38,7 +62,7 @@ action "build" {
   args  = "run build"
 
   needs = [
-    "is-branch-master"
+    "pre-test"
   ]
 }
 
