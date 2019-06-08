@@ -1,8 +1,16 @@
-workflow "Push" {
+workflow "Deploy" {
   on       = "push"
 
   resolves = [
     "deploy"
+  ]
+}
+
+workflow "Pull Request" {
+  on       = "pull_request"
+
+  resolves = [
+    "test"
   ]
 }
 
@@ -34,7 +42,7 @@ action "build" {
   args  = "run build"
 
   needs = [
-    "test"
+    "is-branch-master"
   ]
 }
 
