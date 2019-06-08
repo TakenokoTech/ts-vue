@@ -2,8 +2,7 @@ workflow "Push" {
   on       = "push"
 
   resolves = [
-    "deploy",
-    "is-branch-master"
+    "deploy"
   ]
 }
 
