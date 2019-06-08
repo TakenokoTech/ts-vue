@@ -29,12 +29,8 @@ action "test" {
 }
 
 action "is-branch-master" {
-  uses  = "actions/bin/filter@master"
-  args  = "branch master"
-
-  needs = [
-    "test"
-  ]
+  uses = "actions/bin/filter@master"
+  args = "branch master"
 }
 
 action "build" {
