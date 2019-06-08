@@ -1,5 +1,5 @@
 workflow "Deploy" {
-  resolves = ["GitHub Action for npm", "GitHub Action for npm-1"]
+  resolves = ["GitHub Action for npm"]
   on = "push"
 }
 
