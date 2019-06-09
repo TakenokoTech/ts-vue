@@ -8,3 +8,7 @@ overrides:
   - files: "package.json"
     options:
       tabWidth: 2
+
+  - files: "settings.json"
+    options:
+      tabWidth: 4
