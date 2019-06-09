@@ -10,8 +10,9 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
+    "noImplicitAny": false,
     "baseUrl": ".",
-    "types": ["webpack-env", "vuetify", "mocha", "chai"],
+    "types": ["webpack-env", "vuetify", "leaflet", "mocha", "chai"],
     "paths": {
       "@/*": ["src/*"]
     },

@@ -44,8 +44,9 @@ export default {
     return {
       drawer: false,
       links: [
-        {icon: 'dashboard', text: 'Home', route: '/'},
-        {icon: 'dashboard', text: 'About', route: '/about'},
+        { icon: 'dashboard', text: 'Home', route: '/' },
+        { icon: 'dashboard', text: 'About', route: '/about' },
+        { icon: 'dashboard', text: 'Map', route: '/map' },
       ],
     };
   },
