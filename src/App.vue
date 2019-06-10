@@ -29,6 +29,17 @@
       <!-- <HelloWorld/> -->
       <router-view/>
     </v-content>
+
+    <v-footer class="pa-4">
+      <span style="margin:15px 15px 15px 15px">
+        <a href="https://developer.yahoo.co.jp/about">Web Services by Yahoo! JAPAN</a>
+      </span>
+      <v-spacer></v-spacer>
+      <span style="margin:15px 15px 15px 15px">
+        &copy;{{ new Date().getFullYear() }} —
+        <strong>Takenoko Tech.</strong>
+      </span>
+    </v-footer>
   </v-app>
 </template>
 

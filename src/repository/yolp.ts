@@ -1,7 +1,13 @@
 import axios from 'axios';
 import axiosJsonpAdapter from 'axios-jsonp';
 
-async function localserch(lat: number, lon: number): Promise<any> {
+interface LocalSearchResultInfo {
+    Total: number;
+    Start: number;
+    Count: number;
+}
+
+async function localserch(lat: number, lon: number, start: number): Promise<[any, LocalSearchResultInfo]> {
     return new Promise(async resolve => {
         const url = `https://map.yahooapis.jp/search/local/V1/localSearch`;
         const params = {
@@ -9,14 +15,23 @@ async function localserch(lat: number, lon: number): Promise<any> {
             lat,
             lon,
             results: 100,
-            dist: 3,
+            dist: 5,
             output: 'json',
+            start,
+            group: 'gid',
+            image: true,
         };
+        // tslint:disable-next-line:no-console
+        console.log(`lat: ${lat}, lon: ${lon}, start: ${start}`);
         const json = await axios.get(url, {
             adapter: axiosJsonpAdapter,
             params,
         });
-        resolve(json.data.Feature);
+        resolve([json.data.Feature, {
+            Total: json.data.ResultInfo.Total,
+            Start: json.data.ResultInfo.Start,
+            Count: json.data.ResultInfo.Count,
+        }]);
     });
 }
 
