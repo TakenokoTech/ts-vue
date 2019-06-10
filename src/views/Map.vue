@@ -142,7 +142,7 @@ export default Vue.extend({
 
 #map_view {
   width: 100%;
-  height: 720px;
+  height: 600px;
   background-color: black;
 }
 
