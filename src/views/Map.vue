@@ -117,7 +117,7 @@ export default Vue.extend({
       lat: 35.6825,
       lon: 139.752778,
       info: { Total: 0, Start: 1, Count: 0 },
-      mapDisplay: true,
+      mapDisplay: false,
       loading: true,
       cards: [],
     };
