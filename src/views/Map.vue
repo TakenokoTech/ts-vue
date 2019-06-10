@@ -1,19 +1,33 @@
 <template>
   <div class="map">
-    <!-- <v-container class="elevation-2" style="padding:0px;"> -->
-    <div id="map_view"/>
-    <!-- </v-container> -->
+    <v-layout class="elevation-4" v-bind="{ [`d-folding`]: !mapDisplay}" style="position: relative">
+      <div id="map_view" style="z-index: 0;"/>
+      <v-btn absolute dark fab bottom right color="primary" @click="mapDisplay = !mapDisplay">
+        <v-icon>zoom_out_map</v-icon>
+      </v-btn>
+    </v-layout>
     <v-container id="map_card" grid-list-md>
-      <v-layout row wrap>
+      <div class="text-xs-center" v-if="loading">
+        <v-progress-circular indeterminate color="primary"></v-progress-circular>
+      </div>
+      <v-layout row wrap style="position: relative">
         <v-flex v-for="card in cards" :key="card.title" v-bind="{ [`xs${card.flex}`]: true }">
           <v-card>
-            <v-img :src="card.image" aspect-ratio="2.75"></v-img>
-            <v-card-title primary-title>
-              <div>
-                <!-- <h3 class="headline mb-0">{{card.title}}</h3> -->
-                <div>{{ card.text }}</div>
-              </div>
-            </v-card-title>
+            <v-img :src="card.image" aspect-ratio="2.75">
+              <v-container fill-height fluid pa-2 style="background: rgba(0,0,0,0.5);">
+                <v-layout fill-height>
+                  <v-flex xs12 align-end flexbox>
+                    <span class="white--text" v-text="card.name"></span>
+                  </v-flex>
+                </v-layout>
+              </v-container>
+            </v-img>
+            <!-- <v-card-title primary-title> -->
+            <!-- <div> -->
+            <!-- <h3 class="headline mb-0">{{card.title}}</h3> -->
+            <!-- <div>{{ card.text }}</div> -->
+            <!-- </div> -->
+            <!-- </v-card-title> -->
           </v-card>
         </v-flex>
       </v-layout>
@@ -50,12 +64,13 @@ const didMount = async (self: any) => {
     if (store.Property.LeadImage) {
       cards.push({
         image: store.Property.LeadImage,
-        title: store.Gid,
-        text: store.Name,
-        flex: 6,
+        gid: store.Gid,
+        name: store.Name,
+        flex: 3,
       });
     }
   }
+  self.loading = false;
   self.cards = cards;
 };
 
@@ -65,11 +80,9 @@ export default Vue.extend({
   },
   data() {
     return {
-      cards: [
-        // { image: '', title: 'title1', text: 'Home', flex: 4 },
-        // { image: '', title: 'title2', text: 'About', flex: 4 },
-        // { image: '', title: 'title3', text: 'Map', flex: 4 },
-      ],
+      mapDisplay: true,
+      loading: true,
+      cards: [],
     };
   },
 });
@@ -81,11 +94,17 @@ export default Vue.extend({
   width: 100%;
   height: 100%;
 }
+
 #map_view {
   width: 100%;
-  height: 400px;
+  height: 720px;
   background-color: black;
 }
+
+.d-folding #map_view {
+  height: 300px;
+}
+
 #map_card {
   /* position: absolute; */
   /* right: 16px; */
