@@ -1,3 +1,5 @@
+/* tslint:disable:no-console */
+
 import axios from 'axios';
 import axiosJsonpAdapter from 'axios-jsonp';
 
@@ -7,7 +9,18 @@ interface LocalSearchResultInfo {
     Count: number;
 }
 
-async function localserch(lat: number, lon: number, start: number): Promise<[any, LocalSearchResultInfo]> {
+interface LocalSearchOption {
+    dist?: number;
+    image?: boolean;
+    gc?: string;
+}
+
+async function localserch(
+    lat: number,
+    lon: number,
+    start: number,
+    option: LocalSearchOption = {},
+): Promise<[any, LocalSearchResultInfo]> {
     return new Promise(async resolve => {
         const url = `https://map.yahooapis.jp/search/local/V1/localSearch`;
         const params = {
@@ -15,23 +28,30 @@ async function localserch(lat: number, lon: number, start: number): Promise<[any
             lat,
             lon,
             results: 100,
-            dist: 5,
+            sort: 'dist',
             output: 'json',
             start,
             group: 'gid',
-            image: true,
+            dist: option.dist || 1,
+            image: option.image === undefined ? true : option.image,
+            gc: option.gc || '',
         };
-        // tslint:disable-next-line:no-console
+        console.log(`---> API CALL`);
         console.log(`lat: ${lat}, lon: ${lon}, start: ${start}`);
+        console.log(option);
+        console.log(`<---`);
         const json = await axios.get(url, {
             adapter: axiosJsonpAdapter,
             params,
         });
-        resolve([json.data.Feature, {
-            Total: json.data.ResultInfo.Total,
-            Start: json.data.ResultInfo.Start,
-            Count: json.data.ResultInfo.Count,
-        }]);
+        resolve([
+            json.data.Feature,
+            {
+                Total: json.data.ResultInfo.Total,
+                Start: json.data.ResultInfo.Start,
+                Count: json.data.ResultInfo.Count,
+            },
+        ]);
     });
 }
 

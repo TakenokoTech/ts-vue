@@ -1,19 +1,41 @@
 <template>
   <div class="map">
-    <v-layout class="elevation-4" v-bind="{ [`d-folding`]: !mapDisplay}" style="position: relative">
+    <v-layout class="elevation-4" v-bind="{ [`d-folding`]: folding}" style="position: relative">
       <div id="map_view" style="z-index: 0;"/>
-      <v-btn absolute dark fab bottom right color="primary" @click="mapDisplay = !mapDisplay">
+      <v-btn absolute dark fab bottom right color="primary" @click="folding = !folding">
         <v-icon>zoom_out_map</v-icon>
       </v-btn>
     </v-layout>
     <v-container id="map_card" grid-list-md v-scroll="handleScroll">
+      <v-layout row wrap style="position: relative" pb-5>
+        <div class="text-xs-center" style="width: 100%;">
+          <span v-for="station in stations" v-bind:key="station.name">
+            <v-btn
+              outline
+              color="primary"
+              @click="onClickToStation(station.marker)"
+            >{{station.name}}</v-btn>
+          </span>
+        </div>
+        <div class="text-xs-center" style="width: 100%;">
+          <span v-for="genre in Object.keys(genres)" v-bind:key="genre.name">
+            <v-btn
+              round
+              color="primary"
+              @click="onClickToGenre(genre)"
+              v-bind="{[`outline`]: !genres[genre]}"
+            >{{genre}}</v-btn>
+          </span>
+        </div>
+      </v-layout>
       <v-layout row wrap style="position: relative">
         <v-alert :value="true" type="success">
-          <div>{{this.info.Start + this.info.Count -1}} / {{info.Total}}</div>
+          <div>{{stations.length > 1 ? stations[0].name + " 周辺" : ""}}</div>
+          <div>{{info.Start + info.Count -1}} / {{info.Total}}</div>
         </v-alert>
       </v-layout>
       <v-layout row wrap style="position: relative">
-        <v-flex v-for="card in cards" :key="card.title" v-bind="{ [`xs${card.flex}`]: true }">
+        <v-flex v-for="card in cards" :key="card.title" v-bind="card.flex">
           <v-card @click="onClickToCard(card)">
             <v-img :src="card.image" aspect-ratio="2">
               <v-container fill-height fluid pa-2 style="background: rgba(0,0,0,0.5);">
@@ -39,6 +61,8 @@ import Vue from 'vue';
 import L from '@/plugins/leaflet';
 import YolpRepository from '@/repository/yolp';
 import yolp from '@/repository/yolp';
+import * as MapUtils from '@/utils/MapUtils';
+import * as GenreJson from '@/utils/GenreJson';
 
 const didMount = async (self: any) => {
   self.map = L.map('map_view', {
@@ -46,18 +70,17 @@ const didMount = async (self: any) => {
     zoom: 15,
   })
     .addLayer(L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png'))
-    .on('click', (p: any) => onClickToMap(self, p));
-  load(self, 1);
+    .on('click', (p: any) => onClickToMap(self, p.latlng.lat, p.latlng.lng));
+  loadStore(self, 1);
+  loadStation(self, 1);
 };
 
-const load = async (self: any, start: number) => {
+const loadStore = async (self: any, start: number) => {
   self.loading = true;
   self.info = { Total: 0, Start: 1, Count: 0 };
-  const [result, info] = await YolpRepository.localserch(
-    self.lat,
-    self.lon,
-    start,
-  );
+  const [result, info] = await YolpRepository.localserch(self.lat, self.lon, start, {
+    gc: GenreJson.transformCode(MapUtils.enable(self.genres)),
+  });
   const cards: any[] = self.cards;
   for (const store of result || []) {
     const [storeLon, storeLat] = store.Geometry.Coordinates.split(',');
@@ -67,13 +90,35 @@ const load = async (self: any, start: number) => {
       gid: store.Gid,
       name: store.Name,
       marker: L.marker(latlon),
-      flex: 3,
+      flex: { xs6: true, sm6: true, md3: true },
     });
     self.map.addLayer(cards[cards.length - 1].marker);
   }
   self.loading = false;
   self.info = info;
   self.cards = cards;
+};
+
+const loadStation = async (self, start) => {
+  const [result, info] = await YolpRepository.localserch(self.lat, self.lon, start, {
+    image: false,
+    gc: '0306006',
+    dist: 1,
+  });
+  self.stations = [];
+  for (const store of result || []) {
+    store.Name = store.Name.split('　').pop();
+    if (!store.Name.endsWith('駅')) {
+      continue;
+    }
+    const [storeLon, storeLat] = store.Geometry.Coordinates.split(',');
+    const latlon = new L.LatLng(storeLat, storeLon);
+    self.stations.push({
+      gid: store.Gid,
+      name: store.Name,
+      marker: L.marker(latlon),
+    });
+  }
 };
 
 const onClickToCard = (self: any, p: any) => {
@@ -84,15 +129,27 @@ const onClickToCard = (self: any, p: any) => {
   self.map.setView([p.marker.getLatLng().lat, p.marker.getLatLng().lng]);
 };
 
-const onClickToMap = (self: any, p: any) => {
-  self.lat = p.latlng.lat;
-  self.lon = p.latlng.lng;
+const onClickToMap = (self: any, lat: number, lon: number) => {
+  self.lat = lat;
+  self.lon = lon;
   for (const card of self.cards) {
     self.map.removeLayer(card.marker);
   }
   self.map.setView([self.lat, self.lon]);
   self.cards = [];
-  load(self, 0);
+  loadStore(self, 0);
+  loadStation(self, 0);
+};
+
+const onClickToStation = (self: any, p: L.Marker) => {
+  onClickToMap(self, p.getLatLng().lat, p.getLatLng().lng);
+};
+
+const onClickToGenre = (self: any, p: any) => {
+  for (const genre of Object.keys(self.genres)) {
+    self.genres[genre] = p === genre ? !self.genres[genre] : false;
+  }
+  onClickToMap(self, self.lat, self.lon);
 };
 
 const handleScroll = (self, event) => {
@@ -103,7 +160,7 @@ const handleScroll = (self, event) => {
   if (!self.loading && scrollY + innerHeight > clientHeight) {
     const nextStart = self.info.Start + self.info.Count;
     if (nextStart < self.info.Total) {
-      load(self, nextStart);
+      loadStore(self, nextStart);
     }
   }
 };
@@ -117,9 +174,11 @@ export default Vue.extend({
       lat: 35.6825,
       lon: 139.752778,
       info: { Total: 0, Start: 1, Count: 0 },
-      mapDisplay: false,
+      folding: false,
       loading: true,
       cards: [],
+      stations: [],
+      genres: GenreJson.nameList(),
     };
   },
   methods: {
@@ -128,6 +187,12 @@ export default Vue.extend({
     },
     onClickToCard(event) {
       onClickToCard(this, event);
+    },
+    onClickToStation(event) {
+      onClickToStation(this, event);
+    },
+    onClickToGenre(event) {
+      onClickToGenre(this, event);
     },
   },
 });
@@ -148,14 +213,5 @@ export default Vue.extend({
 
 .d-folding #map_view {
   height: 300px;
-}
-
-#map_card {
-  /* position: absolute; */
-  /* right: 16px; */
-  /* left: 16px; */
-  /* top: 16px; */
-  /* background-color: black; */
-  /* z-index: 1000; */
 }
 </style>
