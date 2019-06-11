@@ -30,15 +30,17 @@
       <router-view/>
     </v-content>
 
-    <v-footer class="pa-4">
-      <span style="margin:15px 15px 15px 15px">
-        <a href="https://developer.yahoo.co.jp/about">Web Services by Yahoo! JAPAN</a>
-      </span>
-      <v-spacer></v-spacer>
-      <span style="margin:15px 15px 15px 15px">
-        &copy;{{ new Date().getFullYear() }} —
-        <strong>Takenoko Tech.</strong>
-      </span>
+    <v-footer height="100px">
+      <v-layout row wrap px-4 justify-space-between>
+        <v-flex class="xs12" style="text-align: center; margin: 4px 4px 15px">
+          <a href="https://developer.yahoo.co.jp/about">Web Services by Yahoo! JAPAN</a>
+        </v-flex>
+        <v-spacer></v-spacer>
+        <v-flex class="xs12 grey--text text--darken-2" style="text-align: center;">
+          &copy;{{ new Date().getFullYear() }}
+          <strong>Takenoko Tech.</strong>
+        </v-flex>
+      </v-layout>
     </v-footer>
   </v-app>
 </template>

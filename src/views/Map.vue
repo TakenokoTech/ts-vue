@@ -1,6 +1,6 @@
 <template>
   <div class="map">
-    <v-layout class="elevation-4" v-bind="{ [`d-folding`]: folding}" style="position: relative">
+    <v-layout id="map_content" class="elevation-4" v-bind="{ [`d-folding`]: folding}">
       <div id="map_view" style="z-index: 0;"/>
       <v-btn absolute dark fab bottom right color="primary" @click="folding = !folding">
         <v-icon>zoom_out_map</v-icon>
@@ -78,9 +78,14 @@ const didMount = async (self: any) => {
 const loadStore = async (self: any, start: number) => {
   self.loading = true;
   self.info = { Total: 0, Start: 1, Count: 0 };
-  const [result, info] = await YolpRepository.localserch(self.lat, self.lon, start, {
-    gc: GenreJson.transformCode(MapUtils.enable(self.genres)),
-  });
+  const [result, info] = await YolpRepository.localserch(
+    self.lat,
+    self.lon,
+    start,
+    {
+      gc: GenreJson.transformCode(MapUtils.enable(self.genres)),
+    },
+  );
   const cards: any[] = self.cards;
   for (const store of result || []) {
     const [storeLon, storeLat] = store.Geometry.Coordinates.split(',');
@@ -100,11 +105,16 @@ const loadStore = async (self: any, start: number) => {
 };
 
 const loadStation = async (self, start) => {
-  const [result, info] = await YolpRepository.localserch(self.lat, self.lon, start, {
-    image: false,
-    gc: '0306006',
-    dist: 1,
-  });
+  const [result, info] = await YolpRepository.localserch(
+    self.lat,
+    self.lon,
+    start,
+    {
+      image: false,
+      gc: '0306006',
+      dist: 1,
+    },
+  );
   self.stations = [];
   for (const store of result || []) {
     store.Name = store.Name.split('　').pop();
@@ -135,7 +145,7 @@ const onClickToMap = (self: any, lat: number, lon: number) => {
   for (const card of self.cards) {
     self.map.removeLayer(card.marker);
   }
-  self.map.setView([self.lat, self.lon]);
+  self.map.setView([self.lat, self.lon], 15);
   self.cards = [];
   loadStore(self, 0);
   loadStation(self, 0);
@@ -203,6 +213,11 @@ export default Vue.extend({
   position: relative;
   width: 100%;
   height: 100%;
+}
+
+#map_content {
+  position: relative;
+  z-index: 0;
 }
 
 #map_view {
