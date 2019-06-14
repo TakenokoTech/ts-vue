@@ -26,10 +26,25 @@
               v-bind="{[`outline`]: !genres[genre]}"
             >{{genre}}</v-btn>
           </span>
+          <v-menu offset-y>
+            <template v-slot:activator="{on}">
+              <v-btn round color="primary" dark v-on="on" v-bind="{[`outline`]: true}">その他</v-btn>
+            </template>
+            <v-list>
+              <v-list-tile
+                v-for="genre in Object.keys(subgenres)"
+                :key="genre"
+                @click="onClickToGenre(genre)"
+              >
+                <v-list-tile-title>{{genre}}</v-list-tile-title>
+              </v-list-tile>
+            </v-list>
+          </v-menu>
         </div>
       </v-layout>
       <v-layout row wrap style="position: relative">
         <v-alert :value="true" type="success">
+          <div>{{genreStr}}</div>
           <div>{{stations.length > 1 ? stations[0].name + " 周辺" : ""}}</div>
           <div>{{info.Start + info.Count -1}} / {{info.Total}}</div>
         </v-alert>
@@ -83,7 +98,10 @@ const loadStore = async (self: any, start: number) => {
     self.lon,
     start,
     {
-      gc: GenreJson.transformCode(MapUtils.enable(self.genres)),
+      gc:
+        GenreJson.transformCode(MapUtils.enable(self.genres)) ||
+        GenreJson.transformCode(MapUtils.enable(self.subgenres), 3) ||
+        '',
     },
   );
   const cards: any[] = self.cards;
@@ -156,8 +174,14 @@ const onClickToStation = (self: any, p: L.Marker) => {
 };
 
 const onClickToGenre = (self: any, p: any) => {
+  self.genreStr = '';
   for (const genre of Object.keys(self.genres)) {
     self.genres[genre] = p === genre ? !self.genres[genre] : false;
+    if (p === genre) { self.genreStr += p; }
+  }
+  for (const genre of Object.keys(self.subgenres)) {
+    self.subgenres[genre] = p === genre ? !self.subgenres[genre] : false;
+    if (p === genre) { self.genreStr += p; }
   }
   onClickToMap(self, self.lat, self.lon);
 };
@@ -188,7 +212,9 @@ export default Vue.extend({
       loading: true,
       cards: [],
       stations: [],
+      genreStr: '',
       genres: GenreJson.nameList(),
+      subgenres: GenreJson.nameList(3),
     };
   },
   methods: {

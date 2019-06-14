@@ -14,13 +14,13 @@ export function nameList(tag = 1): {} {
     return result;
 }
 
-export function transformCode(name: string, tag = 1): string {
+export function transformCode(name: string, tag = 1): string | null {
     for (const genre of json) {
         if (genre[`name${tag}`] === name) {
             return genre[`code${tag}`];
         }
     }
-    return '';
+    return null;
 }
 
 
