@@ -26,9 +26,11 @@
               v-bind="{[`outline`]: !genres[genre].selected}"
             >{{genre}}</v-btn>
           </span>
-          <v-menu offset-y>
+          <v-menu offset-y v-if="genreStr()">
             <template v-slot:activator="{on}">
-              <v-btn round color="primary" dark v-on="on" v-bind="{[`outline`]: true}">その他</v-btn>
+              <v-btn round color="primary" dark v-on="on" v-bind="{flat: true}">
+                <u>詳細検索</u>
+              </v-btn>
             </template>
             <v-list>
               <v-list-tile
