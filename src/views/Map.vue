@@ -23,7 +23,7 @@
               round
               color="primary"
               @click="onClickToGenre(genre)"
-              v-bind="{[`outline`]: !genres[genre]}"
+              v-bind="{[`outline`]: !genres[genre].selected}"
             >{{genre}}</v-btn>
           </span>
           <v-menu offset-y>
@@ -32,7 +32,7 @@
             </template>
             <v-list>
               <v-list-tile
-                v-for="genre in Object.keys(subgenres)"
+                v-for="genre in Object.keys(otherGenre())"
                 :key="genre"
                 @click="onClickToGenre(genre)"
               >
@@ -44,7 +44,7 @@
       </v-layout>
       <v-layout row wrap style="position: relative">
         <v-alert :value="true" type="success">
-          <div>{{genreStr}}</div>
+          <div>{{genreStr()}}</div>
           <div>{{stations.length > 1 ? stations[0].name + " 周辺" : ""}}</div>
           <div>{{info.Start + info.Count -1}} / {{info.Total}}</div>
         </v-alert>
@@ -98,10 +98,7 @@ const loadStore = async (self: any, start: number) => {
     self.lon,
     start,
     {
-      gc:
-        GenreJson.transformCode(MapUtils.enable(self.genres)) ||
-        GenreJson.transformCode(MapUtils.enable(self.subgenres), 3) ||
-        '',
+      gc: GenreJson.transformCode(MapUtils.enable(self.genres) || '') || '',
     },
   );
   const cards: any[] = self.cards;
@@ -174,14 +171,23 @@ const onClickToStation = (self: any, p: L.Marker) => {
 };
 
 const onClickToGenre = (self: any, p: any) => {
-  self.genreStr = '';
-  for (const genre of Object.keys(self.genres)) {
-    self.genres[genre] = p === genre ? !self.genres[genre] : false;
-    if (p === genre) { self.genreStr += p; }
-  }
-  for (const genre of Object.keys(self.subgenres)) {
-    self.subgenres[genre] = p === genre ? !self.subgenres[genre] : false;
-    if (p === genre) { self.genreStr += p; }
+  const enable = MapUtils.enableParent(self.genres) || '';
+  self.genres = MapUtils.clear(self.genres);
+  if (enable !== p) {
+    for (const genre of Object.keys(self.genres)) {
+      self.genres[genre].selected =
+        p === genre ? !self.genres[genre].selected : false;
+    }
+    if (self.genres[enable]) {
+      const g = self.genres[enable];
+      for (const genre of Object.keys(g.children)) {
+        g.children[genre].selected =
+          p === genre ? !g.children[genre].selected : false;
+        if (g.children[genre].selected) {
+          self.genres[enable].selected = true;
+        }
+      }
+    }
   }
   onClickToMap(self, self.lat, self.lon);
 };
@@ -212,9 +218,7 @@ export default Vue.extend({
       loading: true,
       cards: [],
       stations: [],
-      genreStr: '',
       genres: GenreJson.nameList(),
-      subgenres: GenreJson.nameList(3),
     };
   },
   methods: {
@@ -229,6 +233,13 @@ export default Vue.extend({
     },
     onClickToGenre(event) {
       onClickToGenre(this, event);
+    },
+    genreStr() {
+      return MapUtils.enable(this.genres);
+    },
+    otherGenre() {
+      const g = MapUtils.enableParent(this.genres) || '';
+      return (this.genres[g] || {}).children || {};
     },
   },
 });

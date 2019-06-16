@@ -9,15 +9,25 @@ interface Store {
 export function nameList(tag = 1): {} {
     const result: {} = {};
     for (const genre of json) {
-        result[genre[`name${tag}`]] = false;
+        result[genre[`name1`]] = { selected: false, children: {} };
+    }
+    for (const genre of json) {
+        result[genre[`name1`]].children[genre[`name2`]] = { selected: false, children: {} };
+    }
+    for (const genre of json) {
+        result[genre[`name1`]].children[genre[`name2`]].children[genre[`name3`]] = { selected: false };
     }
     return result;
 }
 
-export function transformCode(name: string, tag = 1): string | null {
+export function transformCode(name: string): string | null {
     for (const genre of json) {
-        if (genre[`name${tag}`] === name) {
-            return genre[`code${tag}`];
+        if (genre[`name3`] === name) {
+            return genre[`code3`];
+        } else if (genre[`name2`] === name) {
+            return genre[`code2`];
+        } else if (genre[`name1`] === name) {
+            return genre[`code1`];
         }
     }
     return null;
