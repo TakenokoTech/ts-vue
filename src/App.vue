@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <v-toolbar app>
-      <v-toolbar-side-icon class="grey--text" @click="drawer = !drawer"/>
+      <v-toolbar-side-icon class="grey--text" @click="drawer = !drawer" />
       <v-toolbar-title class="headline text-uppercase">
         <span>Takenoko</span>
         <span class="font-weight-light">&nbsp;Vue.ts&nbsp;</span>
@@ -27,7 +27,7 @@
 
     <v-content>
       <!-- <HelloWorld/> -->
-      <router-view/>
+      <router-view />
     </v-content>
 
     <v-footer height="100px">
@@ -59,7 +59,7 @@ export default {
       links: [
         { icon: 'dashboard', text: 'Home', route: '/' },
         { icon: 'dashboard', text: 'About', route: '/about' },
-        { icon: 'dashboard', text: 'Map', route: '/map' },
+        // { icon: 'dashboard', text: 'Map', route: '/map' },
       ],
     };
   },
